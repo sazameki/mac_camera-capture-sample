@@ -18,6 +18,8 @@
 		8E52D00A190C017600E72AEE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E52CFE9190C017600E72AEE /* Cocoa.framework */; };
 		8E52D012190C017600E72AEE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8E52D010190C017600E72AEE /* InfoPlist.strings */; };
 		8E52D014190C017600E72AEE /* Camera_Capture_SampleTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E52D013190C017600E72AEE /* Camera_Capture_SampleTests.m */; };
+		8E52D01E190C023600E72AEE /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E52D01D190C023600E72AEE /* AVFoundation.framework */; };
+		8E52D020190C027A00E72AEE /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E52D01F190C027A00E72AEE /* QuartzCore.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,6 +52,8 @@
 		8E52D00F190C017600E72AEE /* Camera Capture SampleTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Camera Capture SampleTests-Info.plist"; sourceTree = "<group>"; };
 		8E52D011190C017600E72AEE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		8E52D013190C017600E72AEE /* Camera_Capture_SampleTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Camera_Capture_SampleTests.m; sourceTree = "<group>"; };
+		8E52D01D190C023600E72AEE /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		8E52D01F190C027A00E72AEE /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +61,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E52D020190C027A00E72AEE /* QuartzCore.framework in Frameworks */,
+				8E52D01E190C023600E72AEE /* AVFoundation.framework in Frameworks */,
 				8E52CFEA190C017600E72AEE /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -95,6 +101,8 @@
 		8E52CFE8190C017600E72AEE /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				8E52D01F190C027A00E72AEE /* QuartzCore.framework */,
+				8E52D01D190C023600E72AEE /* AVFoundation.framework */,
 				8E52CFE9190C017600E72AEE /* Cocoa.framework */,
 				8E52D008190C017600E72AEE /* XCTest.framework */,
 				8E52CFEB190C017600E72AEE /* Other Frameworks */,
