@@ -7,6 +7,7 @@
 //
 
 #import "ImageAndVideoSupport.h"
+#import <QuartzCore/QuartzCore.h>
 
 
 /*!
@@ -50,9 +51,9 @@ NSData *SZ_CGImageCreateBitmapDataFromCGImage(CGImageRef cgImage)
 }
 
 /*!
-    ARGB-32ビットの形式のビットマップデータから、CGImageの画像を作成する。
+    ARGB-32ビットの形式のビットマップデータから、ビットマップ・コンテキストを作成する。
  */
-CGImageRef SZ_CGImageCreateFromBitmapData(NSData *bitmapData, CGSize size)
+CGContextRef SZ_CGImageCreateBitmapContextFromBitmapData(NSData *bitmapData, CGSize size)
 {
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     if (colorSpace == NULL) {
@@ -67,12 +68,23 @@ CGImageRef SZ_CGImageCreateFromBitmapData(NSData *bitmapData, CGSize size)
                                                        8, /* bits per component */
                                                        width * 4, /* bytes per row */
                                                        colorSpace, (CGBitmapInfo)kCGImageAlphaPremultipliedFirst);
-
-    CGImageRef cgImage = CGBitmapContextCreateImage(bitmapContext);
-
-    CGContextRelease(bitmapContext);
     CGColorSpaceRelease(colorSpace);
+    return bitmapContext;
+}
 
+CGImageRef SZ_CGImageCreateFromBitmapContext(CGContextRef bitmapContext)
+{
+    return CGBitmapContextCreateImage(bitmapContext);
+}
+
+/*!
+    ARGB-32ビットの形式のビットマップデータから、CGImageの画像を作成する。
+ */
+CGImageRef SZ_CGImageCreateFromBitmapData(NSData *bitmapData, CGSize size)
+{
+    CGContextRef bitmapContext = SZ_CGImageCreateBitmapContextFromBitmapData(bitmapData, size);
+    CGImageRef cgImage = SZ_CGImageCreateFromBitmapContext(bitmapContext);
+    CGContextRelease(bitmapContext);
     return cgImage;
 }
 
@@ -104,5 +116,24 @@ CGImageRef SZ_CGImageCreateFromCMSampleBuffer(CMSampleBufferRef sampleBuffer)
     /* CVBufferRelease(imageBuffer); */  // do not call this!
 
     return newImage;
+}
+
+/*!
+    CIImage画像を元に同じ内容のCGImage画像を作成する。
+ */
+CGImageRef SZ_CGImageCreateFromCIImage(CIImage *ciImage)
+{
+    CGContextRef cgContext = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
+    CIContext *ciContext = [CIContext contextWithCGContext:cgContext options:nil];
+    return [ciContext createCGImage:ciImage fromRect:ciImage.extent];
+}
+
+/*!
+    キャプチャ・セッションから取得したビデオの画像バッファからCIImage画像を作成する。
+ */
+CIImage *SZ_CIImageCreateFromCMSampleBuffer(CMSampleBufferRef sampleBuffer)
+{
+	CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+	return [[CIImage alloc] initWithCVImageBuffer:pixelBuffer];
 }
 

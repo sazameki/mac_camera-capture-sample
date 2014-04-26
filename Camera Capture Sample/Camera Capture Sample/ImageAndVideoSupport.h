@@ -10,8 +10,13 @@
 #import <AVFoundation/AVFoundation.h>
 
 
-CGSize SZ_CGImageGetSize(CGImageRef cgImage);
-NSData *SZ_CGImageCreateBitmapDataFromCGImage(CGImageRef cgImage);
-CGImageRef SZ_CGImageCreateFromBitmapData(NSData *bitmapData, CGSize size);
-CGImageRef SZ_CGImageCreateFromCMSampleBuffer(CMSampleBufferRef sampleBuffer);
+CGSize          SZ_CGImageGetSize(CGImageRef cgImage);
+NSData          *SZ_CGImageCreateBitmapDataFromCGImage(CGImageRef cgImage);
+CGContextRef    SZ_CGImageCreateBitmapContextFromBitmapData(NSData *bitmapData, CGSize size);
+CGImageRef      SZ_CGImageCreateFromBitmapData(NSData *bitmapData, CGSize size);
+CGImageRef      SZ_CGImageCreateFromBitmapContext(CGContextRef bitmapContext);
+CGImageRef      SZ_CGImageCreateFromCMSampleBuffer(CMSampleBufferRef sampleBuffer);
+CGImageRef      SZ_CGImageCreateFromCIImage(CIImage *ciImage);
+
+CIImage *SZ_CIImageCreateFromCMSampleBuffer(CMSampleBufferRef sampleBuffer);
 

@@ -27,6 +27,8 @@
     dispatch_queue_t            videoDataOutputQueue;
 
     CALayer                     *testLayer;
+
+    CIDetector                  *faceDetector;
 }
 
 /*!
@@ -113,6 +115,13 @@
     [self.view.layer addSublayer:testLayer];
 }
 
+- (void)setupFaceDetector
+{
+    faceDetector = [CIDetector detectorOfType:CIDetectorTypeFace
+                                      context:nil
+                                      options:@{ CIDetectorAccuracy : CIDetectorAccuracyHigh }];
+}
+
 /*!
     アプリケーション起動直後、最初に呼び出されるメソッド。
     ここでカメラ利用の初期化処理を行う。
@@ -127,11 +136,51 @@
     [self setupPreviewLayerForSession:captureSession];
     [self setupVideoOutputForSession:captureSession];
 
+    // 顔検出用のフィルタ作成
+    [self setupFaceDetector];
+
     // 画像処理後のデータの表示用レイヤ作成
     [self setupTestLayer];
 
     // カメラ撮影の開始
 	[captureSession startRunning];
+}
+
+- (void)drawFaceFeatures:(NSArray *)features inBitmapContext:(CGContextRef)bitmapContext
+{
+    for (CIFaceFeature *faceFeature in features) {
+        CGContextSetLineWidth(bitmapContext, 10.0);
+
+        // 顔全体の領域の描画
+        CGContextSetRGBStrokeColor(bitmapContext, 1.0, 0.0, 0.0, 1.0);
+        CGContextStrokeRect(bitmapContext, faceFeature.bounds);
+
+        // 口の位置の描画
+        CGPoint mouthPos = faceFeature.mouthPosition;
+        CGRect mouthRect = CGRectMake(mouthPos.x-20, mouthPos.y-20, 40, 40);
+        CGContextSetRGBFillColor(bitmapContext, 1.0, 0.0, 0.0, 0.5);
+        CGContextFillEllipseInRect(bitmapContext, mouthRect);
+
+        // 左目
+        CGPoint leftEyePos = faceFeature.leftEyePosition;
+        CGRect leftEyeRect = CGRectMake(leftEyePos.x-20, leftEyePos.y-20, 40, 40);
+        if (faceFeature.leftEyeClosed) {
+            CGContextSetRGBFillColor(bitmapContext, 0.0, 0.0, 1.0, 0.5);
+        } else {
+            CGContextSetRGBFillColor(bitmapContext, 1.0, 0.0, 0.0, 0.5);
+        }
+        CGContextFillEllipseInRect(bitmapContext, leftEyeRect);
+
+        // 右目
+        CGPoint rightEyePos = faceFeature.rightEyePosition;
+        CGRect rightEyeRect = CGRectMake(rightEyePos.x-20, rightEyePos.y-20, 40, 40);
+        if (faceFeature.rightEyeClosed) {
+            CGContextSetRGBFillColor(bitmapContext, 0.0, 0.0, 1.0, 0.5);
+        } else {
+            CGContextSetRGBFillColor(bitmapContext, 1.0, 0.0, 0.0, 0.5);
+        }
+        CGContextFillEllipseInRect(bitmapContext, rightEyeRect);
+    }
 }
 
 /*!
@@ -142,15 +191,30 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
        fromConnection:(AVCaptureConnection *)connection
 {
     dispatch_sync(dispatch_get_main_queue(), ^(void) {
-        // サンプルバッファから画像を取り出して表示
-        CGImageRef cgImage = SZ_CGImageCreateFromCMSampleBuffer(sampleBuffer);
-        testLayer.contents = (__bridge id)(cgImage);
+        // サンプルバッファから画像を取得
+        CIImage *ciImage = SZ_CIImageCreateFromCMSampleBuffer(sampleBuffer);
+
+        // サンプルバッファから画像を取得
+        CGImageRef cgImage = SZ_CGImageCreateFromCIImage(ciImage);
+        CGSize imageSize = SZ_CGImageGetSize(cgImage);
+        NSData *bitmapData = SZ_CGImageCreateBitmapDataFromCGImage(cgImage);
+        CGContextRef bitmapContext = SZ_CGImageCreateBitmapContextFromBitmapData(bitmapData, imageSize);
+
+        // Core Imageフィルタで画像処理
+        NSArray *features = [faceDetector featuresInImage:ciImage options:nil];
+        [self drawFaceFeatures:features inBitmapContext:bitmapContext];
+
+        // 画像処理結果を表示
+        CGImageRef resultImage = SZ_CGImageCreateFromBitmapContext(bitmapContext);
+        testLayer.contents = (__bridge id)(resultImage);
 
         // クリーンアップ
+        CGImageRelease(resultImage);
+        CGContextRelease(bitmapContext);
         CGImageRelease(cgImage);
 
         // 画像取得のインターバルを設定
-        [NSThread sleepForTimeInterval:0.5];
+        //[NSThread sleepForTimeInterval:0.5];
     });
 }
 
