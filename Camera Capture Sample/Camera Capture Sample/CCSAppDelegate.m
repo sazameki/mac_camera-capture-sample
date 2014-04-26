@@ -8,17 +8,25 @@
 
 #import "CCSAppDelegate.h"
 #import <AVFoundation/AVFoundation.h>
+#import "ImageAndVideoSupport.h"
 
 
-@interface CCSAppDelegate ()
+@interface CCSAppDelegate ()<AVCaptureVideoDataOutputSampleBufferDelegate>
+
 @property (unsafe_unretained) IBOutlet NSWindow *mainWindow;
 @property (weak) IBOutlet NSView *view;
+
 @end
 
 
 @implementation CCSAppDelegate {
     AVCaptureSession            *captureSession;
     AVCaptureVideoPreviewLayer  *previewLayer;
+
+    AVCaptureVideoDataOutput    *videoDataOutput;
+    dispatch_queue_t            videoDataOutputQueue;
+
+    CALayer                     *testLayer;
 }
 
 /*!
@@ -73,6 +81,39 @@
 }
 
 /*!
+    ビデオデータをバッファに格納するための出力をキャプチャ・セッションに追加する。
+ */
+- (void)setupVideoOutputForSession:(AVCaptureSession *)session
+{
+    videoDataOutput = [AVCaptureVideoDataOutput new];
+	videoDataOutput.videoSettings = @{ (__bridge NSString*)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA) };
+    if ([session canAddOutput:videoDataOutput]) {
+        videoDataOutput.alwaysDiscardsLateVideoFrames = YES;    // ←画像取得と画像処理に時間がかかった場合、その間の新規のビデオデータを破棄する。
+        videoDataOutputQueue = dispatch_queue_create("VideoDataOutputQueue", DISPATCH_QUEUE_SERIAL);
+        [videoDataOutput setSampleBufferDelegate:self queue:videoDataOutputQueue];
+        [session addOutput:videoDataOutput];
+    } else {
+        NSLog(@"Cannot add video output.");
+    }
+}
+
+/*!
+    画像処理後のデータを表示するためのレイヤを作成する。
+ */
+- (void)setupTestLayer
+{
+    testLayer = [CALayer layer];
+    testLayer.bounds = CGRectMake(0, 0, 320, 180);
+    testLayer.position = CGPointMake(0, 0);
+    testLayer.anchorPoint = CGPointMake(0, 0);
+    testLayer.borderWidth = 1.0;
+    testLayer.borderColor = [NSColor whiteColor].CGColor;
+    testLayer.backgroundColor = [NSColor blackColor].CGColor;
+
+    [self.view.layer addSublayer:testLayer];
+}
+
+/*!
     アプリケーション起動直後、最初に呼び出されるメソッド。
     ここでカメラ利用の初期化処理を行う。
  */
@@ -84,9 +125,33 @@
     // カメラ利用のためのキャプチャ・セッション作成
     captureSession = [self setupAVCaptureSession];
     [self setupPreviewLayerForSession:captureSession];
+    [self setupVideoOutputForSession:captureSession];
+
+    // 画像処理後のデータの表示用レイヤ作成
+    [self setupTestLayer];
 
     // カメラ撮影の開始
 	[captureSession startRunning];
+}
+
+/*!
+    ビデオデータが更新された時点で呼び出されるコールバック・メソッド。
+ */
+- (void)captureOutput:(AVCaptureOutput *)captureOutput
+didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
+       fromConnection:(AVCaptureConnection *)connection
+{
+    dispatch_sync(dispatch_get_main_queue(), ^(void) {
+        // サンプルバッファから画像を取り出して表示
+        CGImageRef cgImage = SZ_CGImageCreateFromCMSampleBuffer(sampleBuffer);
+        testLayer.contents = (__bridge id)(cgImage);
+
+        // クリーンアップ
+        CGImageRelease(cgImage);
+
+        // 画像取得のインターバルを設定
+        [NSThread sleepForTimeInterval:0.5];
+    });
 }
 
 @end

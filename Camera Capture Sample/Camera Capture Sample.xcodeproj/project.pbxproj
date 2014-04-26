@@ -20,6 +20,7 @@
 		8E52D014190C017600E72AEE /* Camera_Capture_SampleTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E52D013190C017600E72AEE /* Camera_Capture_SampleTests.m */; };
 		8E52D01E190C023600E72AEE /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E52D01D190C023600E72AEE /* AVFoundation.framework */; };
 		8E52D020190C027A00E72AEE /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E52D01F190C027A00E72AEE /* QuartzCore.framework */; };
+		8E52D023190C04F800E72AEE /* ImageAndVideoSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E52D022190C04F800E72AEE /* ImageAndVideoSupport.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +55,8 @@
 		8E52D013190C017600E72AEE /* Camera_Capture_SampleTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Camera_Capture_SampleTests.m; sourceTree = "<group>"; };
 		8E52D01D190C023600E72AEE /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		8E52D01F190C027A00E72AEE /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		8E52D021190C04F800E72AEE /* ImageAndVideoSupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageAndVideoSupport.h; sourceTree = "<group>"; };
+		8E52D022190C04F800E72AEE /* ImageAndVideoSupport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageAndVideoSupport.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +128,8 @@
 			children = (
 				8E52CFFB190C017600E72AEE /* CCSAppDelegate.h */,
 				8E52CFFC190C017600E72AEE /* CCSAppDelegate.m */,
+				8E52D021190C04F800E72AEE /* ImageAndVideoSupport.h */,
+				8E52D022190C04F800E72AEE /* ImageAndVideoSupport.m */,
 				8E52CFFE190C017600E72AEE /* MainMenu.xib */,
 				8E52D001190C017600E72AEE /* Images.xcassets */,
 				8E52CFF0190C017600E72AEE /* Supporting Files */,
@@ -262,6 +267,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8E52CFFD190C017600E72AEE /* CCSAppDelegate.m in Sources */,
+				8E52D023190C04F800E72AEE /* ImageAndVideoSupport.m in Sources */,
 				8E52CFF6190C017600E72AEE /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
