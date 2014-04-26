@@ -284,6 +284,25 @@
     isRightEyeClosed = [self checkEyeClosedInRect:rightEyeRect ciImage:ciImage history:rightEyeHistory historyPos:&rightEyeHistoryPos];
 }
 
+- (CGFloat)calcFaceAngleWithFaceFeatures:(NSArray *)features
+{
+    if (features.count == 0) {
+        return 0.0;
+    }
+
+    CIFaceFeature *feature = features[0];
+    if (!feature.hasLeftEyePosition || !feature.hasRightEyePosition) {
+        return 0.0;
+    }
+
+    CGPoint leftEyePos = feature.leftEyePosition;
+    CGPoint rightEyePos = feature.rightEyePosition;
+
+    CGFloat angle = atan2(rightEyePos.y - leftEyePos.y, rightEyePos.x - leftEyePos.x);
+
+    return angle;
+}
+
 /*!
     ビデオデータが更新された時点で呼び出されるコールバック・メソッド。
  */
@@ -308,7 +327,19 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 
         // Core Imageフィルタで画像処理
         NSArray *features = [faceDetector featuresInImage:ciImage options:nil];
-        [self checkEyesClosedWithFeatures:features ciImage:ciImage];
+        CGFloat angle = [self calcFaceAngleWithFaceFeatures:features];
+
+        // 顔の傾きを元に戻した画像を使って目の切り出しを行う
+        CIFilter *transformFilter = [CIFilter filterWithName:@"CIAffineTransform"];
+        [transformFilter setDefaults];
+        [transformFilter setValue:ciImage forKey:@"inputImage"];
+        NSAffineTransform *transform = [NSAffineTransform transform];
+        [transform rotateByRadians:-angle];
+        [transformFilter setValue:transform forKey:@"inputTransform"];
+        ciImage = [transformFilter valueForKey:@"outputImage"];
+        NSArray *features2 = [faceDetector featuresInImage:ciImage options:nil];
+        [self checkEyesClosedWithFeatures:features2 ciImage:ciImage];
+
         [self drawFaceFeatures:features inBitmapContext:bitmapContext];
 
         // 画像処理結果を表示
